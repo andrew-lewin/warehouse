@@ -31,11 +31,15 @@ defmodule Warehouse do
       iex> Warehouse.answer(3,2)
       "9"
   """
-  def answer(x, y) do
+  def answer(x, y) when x >= 1 and x <= 100_000 and y >= 1 and y <= 100_000 do
     x
     |> triangular_number()
     |> Kernel.+(upward_sum(x, y))
     |> Integer.to_string()
+  end
+
+  def answer(x, y) do
+    IO.puts("x and y must be between 1 and 100,000. x: #{x}, y: #{y}")
   end
 
   @doc """
@@ -109,9 +113,7 @@ defmodule Warehouse do
     6
   """
   def upward_sum(_x, 1), do: 0
-  def upward_sum(x, y) do
-    x + upward_sum(x+1, y-1)
-  end
+  def upward_sum(x, y), do: x + upward_sum(x+1, y-1)
 
   @doc """
   Takes two numbers, y and id, and figures out what the corresponding
@@ -123,13 +125,19 @@ defmodule Warehouse do
     13457
   """
   def stretch_goal(y, id, lo \\ 1, hi \\ 100_000) do
-    x = Integer.floor_div((hi + lo), 2)
-    result = fast_triangular_number(x) + upward_sum(x, y)
-    cond do
-      hi < lo -> IO.puts("There is no x such that when y is #{y} the ID is #{id}")
-      result > id -> stretch_goal(y, id, lo, x - 1)
-      result < id -> stretch_goal(y, id, x + 1, hi)
-      true -> x
-    end
+    x_guess = Integer.floor_div((hi + lo), 2)
+    result = fast_triangular_number(x_guess) + upward_sum(x_guess, y)
+    check_stretch_goal_guess(x_guess, result, y, id, lo, hi)
   end
+
+  defp check_stretch_goal_guess(_x, _result, y, id, lo, hi) when hi < lo, do:
+    IO.puts("There is no x such that when y is #{y} the ID is #{id}")
+
+  defp check_stretch_goal_guess(x, result, y, id, lo, _hi) when result > id, do:
+    stretch_goal(y, id, lo, x - 1)
+
+  defp check_stretch_goal_guess(x, result, y, id, _lo, hi) when result < id, do:
+    stretch_goal(y, id, x + 1, hi)
+
+  defp check_stretch_goal_guess(x, _result, _y, _id, _lo, _hi), do: x
 end

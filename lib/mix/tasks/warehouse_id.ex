@@ -2,8 +2,7 @@ defmodule Mix.Tasks.WarehouseId do
   use Mix.Task
 
   def run(_) do
-    Warehouse.read()
-    |> solve()
+    Warehouse.read() |> solve()
   end
 
   defp solve([]), do: :noop
